@@ -1,6 +1,6 @@
 from time import sleep
 
-from constants.xpath_consts import XpathConsts
+from constants.start_page_consts import StartPageConsts
 from pages.base_page import BasePage
 
 
@@ -8,7 +8,7 @@ class StartPage(BasePage):
 
     def __init__(self, driver):
         super().__init__(driver)
-        self.constants = XpathConsts()
+        self.constants = StartPageConsts()
 
     def sign_up(self, username, email, password):
         """Sign up as random user"""
