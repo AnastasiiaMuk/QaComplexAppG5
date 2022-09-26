@@ -1,3 +1,6 @@
+import logging
+
+import pytest
 from selenium import webdriver
 
 from constants.base import DRIVER_PATH, BASE_URL
@@ -6,26 +9,30 @@ from pages.utils import random_username, random_email, random_password
 
 
 class TestStartPage:
+    log = logging.getLogger("[StartPage]")
 
-    def test_random_sign_up(self):
+    @pytest.fixture(scope="function")
+    def start_page(self):
+        # Pre-conditions
+        driver = webdriver.Chrome(DRIVER_PATH)
+        driver.get(BASE_URL)
+        driver.implicitly_wait(1)
+        # Steps
+        yield StartPage(driver)
+        # Post-conditions
+        driver.close()
+
+    def test_random_sign_up(self, start_page):
         """
-        -Steps:
-            - Create driver
-            - Open page
+        - Pre-conditions:
+            - Open start page
+        - Steps:
             - Generate random username, random email, random password
             - Fill username, email, password
             - Click on Sign Up button
             - Verify registration is successful
-            - Close driver
         """
 
-        # Create driver
-        driver = webdriver.Chrome(DRIVER_PATH)
-
-        # Open page
-        driver.get(BASE_URL)
-
-        start_page = StartPage(driver)
 
         # Prepare data
         username_value = random_username()
@@ -43,6 +50,3 @@ class TestStartPage:
 
         # Verify button 'Sign Out'
         start_page.verify_button_sign_out()
-
-        # Close driver
-        driver.close()
