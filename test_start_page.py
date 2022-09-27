@@ -1,74 +1,52 @@
-import random
-from time import sleep
+import logging
 
+import pytest
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+
+from constants.base import DRIVER_PATH, BASE_URL
+from pages.start_page import StartPage
+from pages.utils import random_username, random_email, random_password
 
 
 class TestStartPage:
+    log = logging.getLogger("[StartPage]")
 
-    def test_random_sign_up(self):
+    @pytest.fixture(scope="function")
+    def start_page(self):
+        # Pre-conditions
+        driver = webdriver.Chrome(DRIVER_PATH)
+        driver.get(BASE_URL)
+        driver.implicitly_wait(1)
+        # Steps
+        yield StartPage(driver)
+        # Post-conditions
+        driver.close()
+
+    def test_random_sign_up(self, start_page):
         """
-        -Steps:
-            - Create driver
-            - Open page
-            - Generate random username
-            - Fill username
-            - Generate random email
-            - Fill email
-            - Fill password
-            - Click button
-            - Verify URL
-            - Verify button 'Create Post'
-            - Verify button 'Sign Out'
-            - Close driver
+        - Pre-conditions:
+            - Open start page
+        - Steps:
+            - Generate random username, random email, random password
+            - Fill username, email, password
+            - Click on Sign Up button
+            - Verify registration is successful
         """
 
-        # Create driver
-        driver = webdriver.Chrome("C:\\Users\\dvale\\Documents\\QAAutomation\\QaComplexAppG6\\chromedriver.exe")
 
-        # Open page
-        driver.get("https://qa-complex-app-for-testing.herokuapp.com/")
+        # Prepare data
+        username_value = random_username()
+        email_value = random_email()
+        password_value = random_password()
 
-        # Generate random username
-        random_username = random.randrange(1000, 9999, 1)
-
-        # Fill username
-        username = driver.find_element(By.XPATH, './/input[@placeholder="Pick a username"]')
-        username.send_keys('user' + str(random_username))
-        sleep(1)
-
-        # Generate random email
-        random_email = random.randrange(1000, 9999, 1)
-
-        # Fill email
-        email = driver.find_element(By.XPATH, './/input[@placeholder="you@example.com"]')
-        email.send_keys(str(random_email) + '@gmail.com')
-        sleep(1)
-
-        # Fill password
-        password = driver.find_element(By.XPATH, './/input[@placeholder="Create a password"]')
-        password.send_keys('999666333999')
-        sleep(1)
-
-        # Click button
-        button_sign_up = driver.find_element(By.XPATH, '//button[text()="Sign up for OurApp"]')
-        button_sign_up.click()
+        # Sign Up as a random user
+        start_page.sign_up(username_value, email_value, password_value)
 
         # Verify URL
-        url = "https://qa-complex-app-for-testing.herokuapp.com/"
-        get_url = driver.current_url
-        assert url == get_url
+        start_page.verify_url(BASE_URL)
 
         # Verify button 'Create Post'
-        button_create_post = driver.find_element(By.XPATH, './/a[text()="Create Post"]')
-        value_button_create_post = button_create_post.text
-        assert value_button_create_post == "Create Post"
+        start_page.verify_button_create_post()
 
         # Verify button 'Sign Out'
-        button_sign_out = driver.find_element(By.XPATH, './/button[text()="Sign Out"]')
-        value_button_sign_out = button_sign_out.text
-        assert value_button_sign_out == "Sign Out"
-
-        # Close driver
-        driver.close()
+        start_page.verify_button_sign_out()
